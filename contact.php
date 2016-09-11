@@ -3,7 +3,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['email']) && isset($_POST['message'])) {
         $email = $_POST['email'];
         $message = $_POST['message'];
-        SendMessage($email, $message);
+        $blog->SendMessage($email, $message);
     }
 }
 ?>

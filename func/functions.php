@@ -66,7 +66,19 @@ function DelCategory($cat)
     mysqli_close($connect);
 }
 
-function AddPost($cat, $title, $content)
+function AddPost($cat, $title, $content, $file)
+{
+    $connect = mysqli_connect('127.0.0.1', 'root', '', 'Blog');
+    $user_id = (int)$_SESSION['authId'];
+    $time = time();
+    if(mysqli_connect_errno()){
+        exit();
+    }
+    mysqli_query($connect, "INSERT INTO Posts(`title`, `content`, `user_id`, `created_at`, `updated_at`, `category_id`, `img_src`) VALUES ('$title','$content', $user_id, $time, $time, $cat, '$file')");
+    mysqli_close($connect);
+}
+
+function AddPostWitoutImg($cat, $title, $content)
 {
     $connect = mysqli_connect('127.0.0.1', 'root', '', 'Blog');
     $user_id = (int)$_SESSION['authId'];
@@ -106,8 +118,19 @@ function GetLastPost()
     if(mysqli_connect_errno()){
         exit();
     }
-    $query = mysqli_query($connect, "SELECT `id`, `title`, `content`, `user_id`, `created_at`, `updated_at`, `category_id` FROM `Posts` ORDER BY id DESC LIMIT 1");
+    $query = mysqli_query($connect, "SELECT `id`, `title`, `content`, `user_id`, `created_at`, `updated_at`, `category_id`, `img_src` FROM `Posts` ORDER BY id DESC LIMIT 1");
     $result = mysqli_fetch_object($query);
     mysqli_close($connect);
     return $result;
+}
+
+function AddUser($login, $pass, $secret, $name)
+{
+    $connect = mysqli_connect('127.0.0.1', 'root', '', 'Blog');
+    $password = md5($pass);
+    if(mysqli_connect_errno()){
+        exit();
+    }
+    mysqli_query($connect, "INSERT INTO `Users`(`login`, `password_hash`, `password_reset`, `name`) VALUES ('$login','$password','$secret','$name')");
+    mysqli_close($connect);
 }

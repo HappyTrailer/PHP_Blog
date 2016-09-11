@@ -1,12 +1,14 @@
 <?php
 session_start();
-require_once 'functions.php';
+require_once 'class/constants.php';
+require_once 'class/MyBlog.php';
+$blog = new MyBlog(HOST, LOGIN, PASS, NAME);
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
     if($_POST['action'] == 'auth'){
         if(isset($_POST['login']) && isset($_POST['pass'])){
             $login = $_POST['login'];
             $pass = $_POST['pass'];
-            $authId = GetAuth($login, $pass);
+            $authId = $blog->GetAuth($login, $pass);
             if($authId != null) {
                 $_SESSION['authId'] = $authId;
             }
@@ -17,24 +19,30 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     } elseif ($_POST['action'] == 'catAdd') {
         if(isset($_POST['category'])){
             $category = $_POST['category'];
-            AddCategory($category);
+            $blog->AddCategory($category);
         }
     } elseif ($_POST['action'] == 'catDel') {
         if(isset($_POST['cat'])){
             $cat = $_POST['cat'];
-            DelCategory($cat);
+            $blog->DelCategory($cat);
         }
     } elseif ($_POST['action'] == 'postAdd') {
         if(isset($_POST['cat']) && isset($_POST['title']) && isset($_POST['content'])){
             $cat = $_POST['cat'];
             $title = $_POST['title'];
             $content = $_POST['content'];
-            AddPost($cat, $title, $content);
+            if($_FILES['file']['name'] != "") {
+                move_uploaded_file($_FILES['file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . '/img/' . $_FILES['file']['name']);
+                $file = '/img/' . $_FILES['file']['name'];
+                $blog->AddPost($cat, $title, $content, $file);
+            }else{
+                $blog->AddPostWitoutImg($cat, $title, $content);
+            }
         }
     } elseif ($_POST['action'] == 'postDel') {
         if(isset($_POST['post'])){
             $post = $_POST['post'];
-            DelPost($post);
+            $blog->DelPost($post);
         }
     }
 }
@@ -86,7 +94,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <label for="sel">Select category:</label>
                 <select name="cat" multiple class="form-control" id="sel">
                     <?php
-                    $result = GetCategories();
+                    $result = $blog->GetCategories();
                     foreach ($result as $item) { ?>
                         <option value="<?= $item['id'] ?>"><?= $item['name'] ?></option>
                     <?php } ?>
@@ -94,7 +102,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             </div>
             <button type="submit" class="btn btn-default">Delete category</button>
         </form><br><br>
-        <form action="" method="post" style="border: 3px solid gray; border-radius: 15px; padding: 10px;">
+        <form enctype="multipart/form-data" action="" method="post" style="border: 3px solid gray; border-radius: 15px; padding: 10px;">
             <input name="action" type="hidden" value="postAdd">
             <div class="form-group">
                 <label for="title">Title:</label>
@@ -105,10 +113,15 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <textarea name="content" class="form-control" id="content" style="resize: vertical;"></textarea>
             </div>
             <div class="form-group">
+                <label class="btn btn-default btn-file">
+                    Browse Image<input type="file" name="file" style="display: none;">
+                </label>
+            </div>
+            <div class="form-group">
                 <label for="sel">Select category:</label>
                 <select name="cat" class="form-control" id="sel">
                     <?php
-                    $result = GetCategories();
+                    $result = $blog->GetCategories();
                     foreach ($result as $item) { ?>
                         <option value="<?= $item['id'] ?>"><?= $item['name'] ?></option>
                     <?php } ?>
@@ -122,7 +135,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <label for="sel">Select post:</label>
                 <select multiple name="post" class="form-control" id="sel">
                     <?php
-                    $result = array_reverse(GetPosts(), true);
+                    $result = array_reverse($blog->GetPosts(), true);
                     foreach ($result as $item) { ?>
                         <option value="<?= $item['id'] ?>"><?= $item['title'] ?></option>
                     <?php } ?>

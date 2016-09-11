@@ -20,7 +20,9 @@
 </head>
 <body>
 <?php
-require_once 'functions.php';
+require_once 'class/constants.php';
+require_once 'class/MyBlog.php';
+$blog = new MyBlog(HOST, LOGIN, PASS, NAME);
 $menu = [
     ["id" => 1, "url" => "/index.php", "name" => "Home"],
     ["id" => 2, "url" => "/contact.php", "name" => "Contact"],
