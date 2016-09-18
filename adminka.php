@@ -1,30 +1,31 @@
 <?php
 session_start();
-require_once 'class/constants.php';
-require_once 'class/MyBlog.php';
-$blog = new MyBlog(HOST, LOGIN, PASS, NAME);
+require_once 'class/Autoloader.php';
+spl_autoload_register(['Autoloader','load']);
+spl_autoload_register(['Autoloader','loadAndLog']);
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
     if($_POST['action'] == 'auth'){
         if(isset($_POST['login']) && isset($_POST['pass'])){
             $login = $_POST['login'];
             $pass = $_POST['pass'];
-            $authId = $blog->GetAuth($login, $pass);
+            $authId = User::login($pass, $login);
             if($authId != null) {
                 $_SESSION['authId'] = $authId;
             }
         }
     } elseif ($_POST['action'] == 'logOut') {
-        unset($_SESSION['authId']);
+        User::logout();
         session_destroy();
     } elseif ($_POST['action'] == 'catAdd') {
         if(isset($_POST['category'])){
             $category = $_POST['category'];
-            $blog->AddCategory($category);
+            $cat = new Category($category);
+            $cat->addCategory();
         }
     } elseif ($_POST['action'] == 'catDel') {
         if(isset($_POST['cat'])){
             $cat = $_POST['cat'];
-            $blog->DelCategory($cat);
+            Category::delCategory($cat);
         }
     } elseif ($_POST['action'] == 'postAdd') {
         if(isset($_POST['cat']) && isset($_POST['title']) && isset($_POST['content'])){
@@ -34,15 +35,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             if($_FILES['file']['name'] != "") {
                 move_uploaded_file($_FILES['file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . '/img/' . $_FILES['file']['name']);
                 $file = '/img/' . $_FILES['file']['name'];
-                $blog->AddPost($cat, $title, $content, $file);
+                $post = new Post($cat, $title, $content, $file);
+                $post->addPost();
             }else{
-                $blog->AddPostWitoutImg($cat, $title, $content);
+                $post = new Post($cat, $title, $content, "");
+                $post->addPost();
             }
         }
     } elseif ($_POST['action'] == 'postDel') {
         if(isset($_POST['post'])){
             $post = $_POST['post'];
-            $blog->DelPost($post);
+            Post::delPost($post);
         }
     }
 }
@@ -94,7 +97,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <label for="sel">Select category:</label>
                 <select name="cat" multiple class="form-control" id="sel">
                     <?php
-                    $result = $blog->GetCategories();
+                    $result = Category::getCategories();
                     foreach ($result as $item) { ?>
                         <option value="<?= $item['id'] ?>"><?= $item['name'] ?></option>
                     <?php } ?>
@@ -121,7 +124,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <label for="sel">Select category:</label>
                 <select name="cat" class="form-control" id="sel">
                     <?php
-                    $result = $blog->GetCategories();
+                    $result = Category::getCategories();
                     foreach ($result as $item) { ?>
                         <option value="<?= $item['id'] ?>"><?= $item['name'] ?></option>
                     <?php } ?>
@@ -135,7 +138,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <label for="sel">Select post:</label>
                 <select multiple name="post" class="form-control" id="sel">
                     <?php
-                    $result = array_reverse($blog->GetPosts(), true);
+                    $result = array_reverse(Post::getPosts(), true);
                     foreach ($result as $item) { ?>
                         <option value="<?= $item['id'] ?>"><?= $item['title'] ?></option>
                     <?php } ?>

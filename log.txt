@@ -1,0 +1,4 @@
+Warning: 1473842042 -> / Message: Вызван вывод объекта класса User
+Warning: 1473842065 -> / Message: Вызван вывод объекта класса User
+Warning: 1473842092 -> /index.php?id=3 Message: Вызван вывод объекта класса User
+Warning: 1473842094 -> /index.php?id=1 Message: Вызван вывод объекта класса User

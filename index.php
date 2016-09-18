@@ -20,9 +20,11 @@
 </head>
 <body>
 <?php
-require_once 'class/constants.php';
-require_once 'class/MyBlog.php';
-$blog = new MyBlog(HOST, LOGIN, PASS, NAME);
+require_once 'class/Autoloader.php';
+spl_autoload_register(['Autoloader','load']);
+spl_autoload_register(['Autoloader','loadAndLog']);
+/*$user = new User("sdf", "sf", "sdf", "sf");
+echo $user;*/
 $menu = [
     ["id" => 1, "url" => "/index.php", "name" => "Home"],
     ["id" => 2, "url" => "/contact.php", "name" => "Contact"],
@@ -35,7 +37,6 @@ foreach ($menu as $m) {
     if ($m['id'] == $pageId)
         $path = $m['url'];
 }
-$months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 ?>
 <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
     <div class="container-fluid">

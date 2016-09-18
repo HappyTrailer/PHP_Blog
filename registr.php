@@ -1,14 +1,14 @@
 <?php
 session_start();
-require_once 'class/constants.php';
-require_once 'class/MyBlog.php';
-$blog = new MyBlog(HOST, LOGIN, PASS, NAME);
+require_once 'class/Autoloader.php';
+spl_autoload_register(['Autoloader','load']);
+spl_autoload_register(['Autoloader','loadAndLog']);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($_POST['action'] == 'auth') {
         if (isset($_POST['login']) && isset($_POST['pass'])) {
             $login = $_POST['login'];
             $pass = $_POST['pass'];
-            $authId = $blog->GetAuth($login, $pass);
+            $authId = User::login($pass, $login);
             if ($authId != null) {
                 $_SESSION['authId'] = $authId;
             }
@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $pass = $_POST['pass'];
             $secret = $_POST['secret'];
             $name = $_POST['name'];
-            $blog->AddUser($login, $pass, $secret, $name);
+            $user = new User($login, $pass, $secret, $name);
+            $user->registration();
         }
     }
 }

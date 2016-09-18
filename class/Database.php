@@ -1,50 +1,45 @@
 <?php
+require_once 'constants.php';
 class Database
 {
-    private $host;
-    private $login;
-    private $password;
-    private $dbName;
-    private $connect;
+    private static $connect;
 
-    function __construct($host, $login, $password, $dbName)
+    public static function connect()
     {
-        $this->host = $host;
-        $this->login = $login;
-        $this->password = $password;
-        $this->dbName = $dbName;
-    }
-
-    public function connect()
-    {
-        $this->connect = mysqli_connect($this->host, $this->login, $this->password, $this->dbName);
+        self::$connect = mysqli_connect(HOST, LOGIN, PASS, NAME);
         if(mysqli_connect_errno())
         {
             exit();
         }
     }
 
-    public function disconnect()
+    public static function disconnect()
     {
-        mysqli_close($this->connect);
+        mysqli_close(self::$connect);
     }
 
-    public function insertQuery($str)
+    public static function insertQuery($str)
     {
-        mysqli_query($this->connect, $str);
+        self::connect();
+        mysqli_query(self::$connect, $str);
+        self::disconnect();
     }
 
-    public function selectAll($str)
+    public static function selectAll($str)
     {
-        $query = mysqli_query($this->connect, $str);
+        self::connect();
+        $query = mysqli_query(self::$connect, $str);
         $result = mysqli_fetch_all($query, MYSQLI_ASSOC);
+        self::disconnect();
         return $result;
     }
 
-    public function selectObject($str)
+    public static function selectObject($str)
     {
-        $query = mysqli_query($this->connect, $str);
+        self::connect();
+        $query = mysqli_query(self::$connect, $str);
         $result = mysqli_fetch_object($query);
+        self::disconnect();
         return $result;
     }
 }
